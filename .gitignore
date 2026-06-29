@@ -1,0 +1,10 @@
+.gradle/
+build/
+out/
+target/
+*.class
+*.log
+
+# IDE metadata is local state.
+.idea/
+*.iml
