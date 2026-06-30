@@ -39,6 +39,10 @@ subprojects {
             }
         }
     }
+
+    plugins.withType<JavaLibraryPlugin> {
+        dependencies.add("compileOnlyApi", libs.jetbrains.annotations)
+    }
 }
 
 tasks.register("publishGameKitLibrariesToMavenLocal") {

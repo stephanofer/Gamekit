@@ -33,6 +33,7 @@ dependencies {
         api(libs.paper.api)
         api(libs.velocity.api)
         api(libs.boosted.yaml)
+        api(libs.caffeine)
         api(libs.cloud.paper)
         api(libs.cloud.velocity)
         api(libs.cloud.minecraft.extras)

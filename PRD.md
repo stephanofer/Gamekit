@@ -1580,7 +1580,7 @@ Los módulos Paper, Velocity, zMenu, scoreboard, cloud, CraftKit y WorldEdit son
 
 Regla:
 
-> Gradle module = gran responsabilidad del sistema. Dentro del módulo, feature-first. Dentro de feature, responsabilidad cuando haga falta.
+> Gradle module = gran responsabilidad del sistema. Dentro del módulo,los directories deben estar organizados y ordenados con una arquitectura de directorios y archviso de  feature-first. Dentro de feature, responsabilidad cuando haga falta.
 
 Evitar estructura obligatoria `domain/application/infrastructure` en todos los módulos. Solo usar separación hexagonal donde aporte claridad real, especialmente en adapters/storage.
 
@@ -1872,30 +1872,35 @@ La construcción debe iniciar por una vertical funcional completa, no por sistem
 Secuencia recomendada:
 
 1. core + convenciones base;
-2. session;
-3. variant;
-4. queue básica;
-5. Redis runtime mínimo;
-6. server registry;
-7. routing/admission;
-8. arena registry/allocation;
-9. waiting room;
-10. match lifecycle;
-11. team;
-12. Paper adapters mínimos;
-13. experience mínima;
-14. arena reset;
+2. testkit mínimo desde el inicio: fakes, fake clock y fixtures base;
+3. session;
+4. variant;
+5. queue básica;
+6. Redis runtime mínimo;
+7. server registry;
+8. routing/admission;
+9. arena registry/allocation con reset `NoOp` para desarrollo;
+10. waiting room;
+11. match lifecycle;
+12. team;
+13. Paper adapters mínimos;
+14. experience mínima;
 15. persistence/idempotency base;
-16. stats;
-17. rewards;
-18. seasons;
-19. rating/SR;
-20. leaderboards;
-21. competitive integrity;
-22. observability completa;
-23. admin/management in-game;
-24. spectator avanzado;
-25. testkit expandido por contratos.
+16. arena reset real: template reset y adapters opcionales;
+17. stats;
+18. rewards;
+19. seasons;
+20. rating/SR;
+21. leaderboards;
+22. competitive integrity;
+23. observability completa;
+24. admin/management in-game;
+25. spectator avanzado;
+26. testkit expandido por contratos.
+
+El reset `NoOp` permite validar el primer flujo sin bloquear el desarrollo por infraestructura de mundos. El reset real debe llegar después de tener lifecycle, cleanup e idempotencia base, porque depende de saber cuándo una arena terminó, qué recursos se cerraron y cómo se reporta un fallo operacional.
+
+El testkit no debe esperar al final. Desde el primer módulo deben existir fakes mínimos para clock, eventos, repositorios y schedulers. Al final se expande con contract tests y fixtures más completas.
 
 ### 31.1 Primer flujo funcional a validar
 
