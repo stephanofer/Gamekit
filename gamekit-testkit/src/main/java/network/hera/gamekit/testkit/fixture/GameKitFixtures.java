@@ -6,6 +6,8 @@ import network.hera.gamekit.core.definition.MatchKind;
 import network.hera.gamekit.core.definition.MatchVariant;
 import network.hera.gamekit.core.definition.TeamSpec;
 import network.hera.gamekit.core.id.GameId;
+import network.hera.gamekit.core.id.ArenaId;
+import network.hera.gamekit.core.id.MatchId;
 import network.hera.gamekit.core.id.PlayerId;
 import network.hera.gamekit.core.id.QueueId;
 import network.hera.gamekit.core.id.ServerId;
@@ -49,6 +51,14 @@ public final class GameKitFixtures {
 
     public static @NotNull ServerId bedwarsArena01() {
         return ServerId.of("bedwars-arena-01");
+    }
+
+    public static @NotNull MatchId matchOne() {
+        return MatchId.of(UUID.fromString("00000000-0000-0000-0000-000000000101"));
+    }
+
+    public static @NotNull ArenaId lighthouse01() {
+        return ArenaId.of("lighthouse_01");
     }
 
     public static @NotNull MatchVariant casual2v2Variant() {

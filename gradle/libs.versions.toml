@@ -9,7 +9,7 @@ cloud = "2.0.0-beta.17"
 scoreboard-library = "2.8.0"
 zmenu = "1.1.1.5"
 network-player-settings = "2.0.0"
-craftkit = "1.1.0"
+craftkit = "1.2.0"
 placeholderapi = "2.12.2"
 shadow = "9.4.3"
 
