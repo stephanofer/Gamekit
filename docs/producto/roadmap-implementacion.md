@@ -9,7 +9,6 @@ La estrategia es **cross-server-first**: GameKit debe nacer pensando en la topol
 - Construir por verticales verificables, no por modulos sueltos.
 - Validar temprano Redis, routing, admissions y Velocity para no descubrir tarde errores de arquitectura.
 - Mantener dominio sin Paper/Bukkit y probarlo con JUnit puro.
-- Usar `NoOp` para arena reset al principio; el reset real llega despues de lifecycle, cleanup e idempotencia.
 - Crear fakes desde el inicio para testear sin servidores reales, pero modelando conceptos reales: `serverId`, admission, routing, clock y registry.
 
 ## Fase 1: Fundacion de Dominio
@@ -74,7 +73,7 @@ Incluye:
 
 **Objetivo:** modelar servidores, destinos y admisiones cross-server.
 
-Incluye:
+I arena vive en un server concreto. No se puede asignar ni transferir jugadores correctamente si todavia no existe registry/admission/routing.ncluye:
 
 - Server registry.
 - Server roles y heartbeats.
@@ -83,7 +82,7 @@ Incluye:
 - Routing contracts.
 - Fallback contracts.
 
-**Por que antes de arena:** una arena vive en un server concreto. No se puede asignar ni transferir jugadores correctamente si todavia no existe registry/admission/routing.
+**Por que antes de arena:** una
 
 ## Fase 6: Arena Registry y Allocation
 
@@ -96,7 +95,6 @@ Incluye:
 - Estados de arena.
 - Tags y requirements.
 - Reserva distribuida con Redis.
-- Reset `NoOp` para desarrollo.
 
 **Por que antes de matchmaking real:** queue/matchmaking solo produce candidatos; arena allocation decide donde se juega.
 
@@ -242,7 +240,7 @@ Incluye:
 - Observability de reset.
 - Adapter WorldEdit/FAWE solo si hace falta.
 
-**Por que aqui:** el reset real depende de lifecycle, cleanup e idempotencia. Antes alcanza con `NoOp` para validar flujo.
+**Por que aqui:** el reset real depende de lifecycle, cleanup e idempotencia..
 
 ## Fase 16: Stats y Rewards
 

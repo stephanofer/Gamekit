@@ -53,12 +53,20 @@ public final class GameKitFixtures {
         return ServerId.of("bedwars-arena-01");
     }
 
+    public static @NotNull ServerId bedwarsArena02() {
+        return ServerId.of("bedwars-arena-02");
+    }
+
     public static @NotNull MatchId matchOne() {
         return MatchId.of(UUID.fromString("00000000-0000-0000-0000-000000000101"));
     }
 
     public static @NotNull ArenaId lighthouse01() {
         return ArenaId.of("lighthouse_01");
+    }
+
+    public static @NotNull ArenaId rooftop01() {
+        return ArenaId.of("rooftop_01");
     }
 
     public static @NotNull MatchVariant casual2v2Variant() {

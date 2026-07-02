@@ -1,26 +1,21 @@
 ---
-title: Paper Documentation
+title: Development
 tableOfContents: false
 ---
 
-import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import PageCards from "/src/components/PageCards.astro";
 
-Paper is a Minecraft: Java Edition game server, designed to greatly improve performance and offer more advanced features and API.
+Welcome to the Paper development guide! This guide includes information and tutorials for developers
+on how to create and expand on Paper plugins.
 
-<CardGrid>
-  <LinkCard
-    title="Administration"
-    description="Information and tutorials regarding the administration of a Paper server."
-    href="/paper/admin"
-  />
-  <LinkCard
-    title="Development"
-    description="Information and tutorials for developers on how to create and expand on Paper plugins."
-    href="/paper/dev"
-  />
-  <LinkCard
-    title="Contributing"
-    description="Information and tutorials for developers wishing to contribute to the Paper project."
-    href="/paper/contributing"
-  />
-</CardGrid>
+#### Getting started
+
+<PageCards path="src/content/docs/paper/dev/getting-started/index.mdx" />
+
+#### API
+
+<PageCards path="src/content/docs/paper/dev/api/index.mdx" />
+
+#### Miscellaneous
+
+<PageCards path="src/content/docs/paper/dev/misc/index.mdx" />

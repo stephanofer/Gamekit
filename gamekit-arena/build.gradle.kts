@@ -6,4 +6,6 @@ plugins {
 dependencies {
     api(project(":gamekit-core"))
     api(project(":gamekit-network"))
+
+    testImplementation(project(":gamekit-testkit"))
 }

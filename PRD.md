@@ -777,7 +777,6 @@ Al terminar un match:
 
 Estrategias:
 
-- NoOp para tests/desarrollo controlado;
 - World template reset para arenas completas;
 - schematic/FAWE adapter para casos específicos;
 - rollback de cambios no es estrategia primaria inicial.
@@ -1739,7 +1738,6 @@ Usar nombres por responsabilidad:
 - RedisX;
 - CraftKitX;
 - PaperX;
-- NoOpX;
 - FakeX.
 
 ### 30.7 Eventos
@@ -1879,7 +1877,6 @@ Secuencia recomendada:
 6. Redis runtime mínimo;
 7. server registry;
 8. routing/admission;
-9. arena registry/allocation con reset `NoOp` para desarrollo;
 10. waiting room;
 11. match lifecycle;
 12. team;
@@ -1898,7 +1895,6 @@ Secuencia recomendada:
 25. spectator avanzado;
 26. testkit expandido por contratos.
 
-El reset `NoOp` permite validar el primer flujo sin bloquear el desarrollo por infraestructura de mundos. El reset real debe llegar después de tener lifecycle, cleanup e idempotencia base, porque depende de saber cuándo una arena terminó, qué recursos se cerraron y cómo se reporta un fallo operacional.
 
 El testkit no debe esperar al final. Desde el primer módulo deben existir fakes mínimos para clock, eventos, repositorios y schedulers. Al final se expande con contract tests y fixtures más completas.
 
