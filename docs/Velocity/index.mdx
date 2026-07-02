@@ -1,46 +1,21 @@
 ---
-title: Velocity Documentation
+title: Development
+tableOfContents: false
 ---
 
-import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import PageCards from "/src/components/PageCards.astro";
 
-Velocity is the ridiculously scalable, flexible Minecraft proxy.
+Welcome to the Velocity development guide! This guide includes information and tutorials for
+developers to create and expand on Velocity plugins.
 
-## Getting started
+#### Getting started
 
-It is simple to get started with Velocity. Get started with our
-[Getting Started guide](/velocity/getting-started).
+<PageCards path="src/content/docs/velocity/dev/getting-started/index.mdx" />
 
-## I need help
+#### How-to guides
 
-If you need some help with Velocity, please seek help in the following places:
+<PageCards path="src/content/docs/velocity/dev/how-to/index.mdx" />
 
-### 📖 These Docs
+#### API
 
-We have put a lot of effort into documenting Velocity as much as possible with our new website and
-our coverage will continue to expand. We strongly encourage you to check the sidebar of the docs for
-relevant resources. Helping yourself using the resources in these docs saves all of us time.
-
-We recommend you visit the [frequently asked questions](/velocity/faq) to begin your
-search. Most common issues with Velocity are answered there.
-
-Please do not be offended if we respond to your question linking back here. Asking us a question
-already answered in the documentation doesn't help anyone.
-
-### 💬 Our Discord
-
-If you have searched the docs and didn't find the answer to your question, then it is time to
-[join our Discord](https://discord.gg/papermc) to ask your question.
-
-<CardGrid>
-  <LinkCard
-    title="Administration"
-    description="Information and tutorials regarding the administration of a Velocity proxy."
-    href="/velocity/admin"
-  />
-  <LinkCard
-    title="Development"
-    description="Information and tutorials for developers on how to create and expand on Velocity plugins."
-    href="/velocity/dev"
-  />
-</CardGrid>
+<PageCards path="src/content/docs/velocity/dev/api/index.mdx" />
