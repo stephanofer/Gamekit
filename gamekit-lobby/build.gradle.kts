@@ -7,5 +7,4 @@ dependencies {
     api(project(":gamekit-core"))
     api(project(":gamekit-session"))
     api(project(":gamekit-queue"))
-    api(project(":gamekit-experience"))
 }

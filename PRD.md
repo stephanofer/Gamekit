@@ -72,9 +72,9 @@ public final class ExampleModePlugin extends JavaPlugin {
 
         PlayerSessions sessions = PlayerSessions.create(platform.clock(), platform.events());
         QueueModule queues = QueueModule.create(sessions, store);
-        ExperienceModule experience = ExperienceModule.create(platform, sessions);
+        VisualScopes visuals = VisualScopes.create(platform, sessions);
 
-        resources.add(platform.registerListeners(sessions, queues, experience));
+        resources.add(platform.registerListeners(sessions, queues, visuals));
     }
 
     @Override
@@ -691,6 +691,10 @@ GameKit tendrá un único plugin Velocity central para el plano network.
 
 Este plugin será generado desde el propio proyecto GameKit como un `.jar` final instalable directamente en Velocity.
 
+El plano Velocity se mantiene en un único módulo instalable, `gamekit-velocity-plugin`. No existe un módulo separado de librería Velocity mientras no haya un segundo consumidor real. La lógica interna del plugin debe organizarse en servicios y paquetes testeables, pero el boundary Gradle se mantiene simple porque Paper no debe depender de APIs Velocity.
+
+Los plugins Paper y el plugin Velocity se coordinan mediante contratos neutrales de `gamekit-network`, Redis, admissions, registros runtime y señales de transporte cuando correspondan. Paper declara intención; Velocity valida y ejecuta transporte.
+
 Responsabilidades del plugin Velocity central:
 
 - ejecutar transferencias entre servidores;
@@ -775,13 +779,14 @@ Al terminar un match:
 3. si funciona, vuelve a Available;
 4. si falla, pasa a Disabled y se alerta.
 
-Estrategias:
+Estrategia inicial:
 
-- World template reset para arenas completas;
-- schematic/FAWE adapter para casos específicos;
-- rollback de cambios no es estrategia primaria inicial.
+- reset basado en templates de mundo para arenas completas;
+- integración con FastAsyncWorldEdit como capacidad del runtime de arena Paper;
+- fallo de reset termina en `Disabled` y alerta operacional;
+- rollback granular de cambios no es estrategia primaria inicial.
 
-Core no depende directamente de WorldEdit/FAWE.
+`gamekit-arena` conserva contratos de dominio sin depender de Paper ni FAWE. La integración concreta con FAWE vive en `gamekit-arena-paper`, porque reset/import de arenas es una capacidad propia del runtime de arena, no una integración Paper genérica compartida por todos los runtimes.
 
 ---
 
@@ -1017,6 +1022,10 @@ Los jugadores no deben quedar atrapados si falla una proyección o un proceso du
 
 GameKit tendrá un sistema de experience scopes para coordinar visuales y comunicación.
 
+Experience no se modela inicialmente como un módulo Gradle independiente. Sus responsabilidades viven dentro de los runtimes Paper que las ejecutan, especialmente `gamekit-lobby-paper` y `gamekit-arena-paper`. Esto evita crear una abstracción vacía antes de que exista una necesidad transversal real.
+
+La capacidad no se elimina: se mantiene como responsabilidad funcional de GameKit. Si más adelante aparecen contratos compartidos sólidos para scopes visuales, renderers o recursos visuales entre varios runtimes, se puede extraer un módulo dedicado sin cambiar el principio de ownership.
+
 Canales:
 
 - scoreboard;
@@ -1031,6 +1040,8 @@ Canales:
 Regla:
 
 > GameKit gestiona scopes. La modalidad define contenido. CraftKit/render libraries renderizan.
+
+Los runtimes Paper deben registrar y cerrar recursos visuales de forma explícita. Scoreboards, bossbars, titles, actionbars, chat scopes y tareas visuales no deben quedar fuera del scope que los posee.
 
 ### 18.1 Experience scopes
 
@@ -1125,6 +1136,10 @@ Redis se puede reconstruir desde DB.
 ## 20. Seasons
 
 Seasons serán simples, manuales e históricas.
+
+Season no se modela inicialmente como un módulo Gradle independiente. El concepto existe desde el diseño del producto, pero su implementación debe vivir donde aporte valor real: IDs y contexto básico pueden permanecer en `gamekit-core` o en contratos de progression; reglas competitivas, resolución de season activa y captura histórica se incorporan cuando ranked/progression lo necesiten.
+
+Solo debe extraerse un módulo dedicado de seasons cuando exista lifecycle propio suficiente: estados, resolución activa, políticas de ranked, captura al crear match, snapshots históricos, cierre operacional y contratos de persistencia. Hasta entonces, crear un módulo vacío agregaría ruido sin mejorar DX ni mantenibilidad.
 
 No hay resets automáticos.
 
@@ -1272,6 +1287,14 @@ Todo lo que tenga sentido operar in-game debe tener comandos/menús:
 
 Comandos para precisión. Menús para UX.
 
+Admin in-game se divide por ownership operacional:
+
+- operaciones locales de lobby viven en el runtime de lobby Paper;
+- operaciones locales de arena, waiting room o match viven en el runtime de arena Paper;
+- operaciones transversales o globales viven en `gamekit-admin-paper`.
+
+`gamekit-admin-paper` no debe convertirse en un contenedor genérico para cualquier acción con permiso. Su responsabilidad es coordinar superficies administrativas que cruzan runtimes o inspeccionan estado global: servidores, colas, partidas activas, health, processing, integrity, leaderboards, seasons y publicación/operación de configuraciones cuando corresponda.
+
 ### 22.4 Arena operational state
 
 Además de ArenaState runtime, existe estado operativo administrativo:
@@ -1395,25 +1418,26 @@ Si falla persistencia/proyección después de terminar match:
 
 ## 25. Paper adapters
 
-`gamekit-paper` contiene integración con Paper.
+La integración Paper se organiza por runtime operativo, no por dependencia técnica.
 
-Debe ser delgado.
+`gamekit-paper` es la base Paper compartida mínima. Debe mantenerse delgado y concentrarse en capacidades reutilizables de bajo nivel:
 
-Responsabilidades:
+- scheduler adapter;
+- handles de registro de listeners;
+- recursos runtime cerrables;
+- operaciones comunes de Player/World;
+- validación explícita de dependencias runtime cuando aplique;
+- utilidades Paper que no pertenecen a lobby, arena/match ni admin transversal.
 
-- escuchar eventos Paper;
-- traducir a servicios de dominio;
-- aplicar operaciones de Player/World/Inventory;
-- renderizar experience;
-- adaptar scheduler;
-- manejar admission en join;
-- proteger inventario;
-- adaptar chat scope;
-- manejar visibility.
+La lógica de lobby vive en `gamekit-lobby-paper`. Este módulo integra las capacidades necesarias para ejecutar el lobby de modalidad sobre Paper: configuración del lobby, protección e interacción de inventario, acciones de entrada, integración con queue/play request, comandos necesarios del runtime, menús cuando aporten DX y experiencia visual del lobby.
 
-No debe contener lógica de negocio compleja.
+La lógica de arena y match vive en `gamekit-arena-paper`. Este módulo integra admissions en el server destino, waiting room, lifecycle Paper del match, scopes de recursos visuales, operaciones de mundo/jugador, reset/import de arenas mediante FAWE y los comandos/menús necesarios para operar el runtime de arena.
 
-La lógica vive en dominio y se prueba con JUnit.
+La administración transversal vive en `gamekit-admin-paper`. Este módulo integra superficies administrativas que no pertenecen a un único runtime local.
+
+Las integraciones con cloud-minecraft, BoostedYAML, zMenu/CraftKit zMenu, scoreboard-library, NetworkPlayerSettings, PlaceholderAPI y FAWE se ubican dentro del runtime Paper que realmente las usa. No se crean módulos globales por dependencia salvo que aparezca una razón fuerte: dependencia pesada aislable, segundo consumidor real o contrato compartido estable.
+
+No debe existir lógica de gameplay concreta en adapters Paper. La modalidad conserva reglas, textos, menús concretos, scoreboards concretos y comportamiento visual específico.
 
 ### 25.1 Metadata recomendada para plugins consumidores Paper
 
@@ -1430,7 +1454,7 @@ Regla:
 - GameKit como librería shadeada no puede declarar metadata por el consumidor;
 - cada plugin final debe declarar sus dependencias runtime reales.
 
-Dependencias como NetworkPlayerSettings, zMenu, PlaceholderAPI, ViaVersion o PacketEvents no quedan declaradas automáticamente por incluir GameKit en Gradle. El plugin final debe declarar `required`, `load`, `join-classpath` o equivalentes según corresponda.
+Dependencias como NetworkPlayerSettings, zMenu, PlaceholderAPI, ViaVersion, FAWE o PacketEvents no quedan declaradas automáticamente por incluir GameKit en Gradle. El plugin final debe declarar `required`, `load`, `join-classpath` o equivalentes según corresponda.
 
 Ejemplo conceptual:
 
@@ -1518,7 +1542,7 @@ La regla principal es:
 
 > Un módulo Gradle debe representar una responsabilidad grande y estable del sistema, no una clase conceptual ni una subfeature aislada.
 
-La estructura objetivo será:
+La estructura activa es:
 
 | Módulo | Responsabilidad |
 | --- | --- |
@@ -1530,23 +1554,19 @@ La estructura objetivo será:
 | `gamekit-network` | Server registry, routing, admission requests, match location y contratos cross-server. |
 | `gamekit-arena` | Arena definitions, arena slots, allocation, reservation y reset contracts. |
 | `gamekit-match` | Match lifecycle, participants, teams, scopes, finalization y cleanup. |
-| `gamekit-experience` | Experience scopes y contratos de render para scoreboard, tab, bossbars, titles, sounds y chat scopes. |
-| `gamekit-progression` | Stats, rewards, rating/SR y leaderboards cuando compartan pipeline de progresión. |
-| `gamekit-season` | Seasons manuales, season state y captura de season por match. |
+| `gamekit-progression` | Stats, rewards, rating/SR, leaderboards, ledgers y proyecciones cuando compartan pipeline de progresión. |
 | `gamekit-competitive-integrity` | Penalties, flags, eligibility, audit competitivo y señales anti-abuse estructurales. |
 | `gamekit-admin` | Contratos y servicios para management/admin in-game. |
 | `gamekit-infra-craftkit` | Adaptadores hacia CraftKit database, Redis y feedback cuando corresponda. |
-| `gamekit-paper` | Adaptadores Paper delgados: listeners, scheduler, player/world operations, admissions, inventory protection y visibility. |
-| `gamekit-scoreboard-paper` | Integración Paper con scoreboard-library para experience/scoreboards. |
-| `gamekit-zmenu-paper` | Integración opcional con zMenu/CraftKit zMenu para menús y dialogs. |
-| `gamekit-cloud-paper` | Integración opcional con cloud-minecraft para comandos Paper. |
-| `gamekit-velocity` | Contratos y adapters comunes para el plano Velocity/network. |
-| `gamekit-velocity-plugin` | Plugin Velocity central generado como `.jar` instalable en Velocity. |
-| `gamekit-paper-worldedit` | Integración opcional para reset/imports con WorldEdit/FAWE si se decide usar. |
+| `gamekit-paper` | Base Paper compartida: scheduler, registration handles, recursos runtime y operaciones comunes de Player/World. |
+| `gamekit-lobby-paper` | Runtime Paper de lobby de modalidad: configuración, protecciones, acciones de entrada, comandos/menús necesarios, integración con queue y experiencia visual del lobby. |
+| `gamekit-arena-paper` | Runtime Paper de arena/match: admissions, waiting room, match scopes, operaciones de arena, experiencia visual de arena/match y reset/import con FAWE. |
+| `gamekit-admin-paper` | Superficie Paper de administración transversal: operaciones globales o cross-runtime, menús/comandos administrativos, inspección y operación del sistema. |
+| `gamekit-velocity-plugin` | Plugin Velocity central instalable como `.jar`, dueño del lifecycle Velocity y del transporte cross-server. |
 | `gamekit-testkit` | Fakes, fixtures, manual scheduler, fake clock y utilidades de flow tests. |
 | `gamekit-examples` | Ejemplos mínimos de integración y vertical slices de referencia. |
 
-Esta estructura es objetivo, no obligación de crear todos los módulos vacíos desde el primer commit. La implementación debe iniciar por la vertical funcional mínima y agregar módulos cuando exista responsabilidad real.
+Esta estructura representa el layout activo. No se crean módulos vacíos por ideas futuras ni por cada dependencia técnica. Si una responsabilidad como experience o seasons crece hasta necesitar contratos compartidos propios, puede extraerse después con evidencia concreta.
 
 Dominio puro incluye principalmente:
 
@@ -1571,7 +1591,7 @@ Dominio puro incluye principalmente:
 - persistence contracts;
 - observability contracts.
 
-Los módulos Paper, Velocity, zMenu, scoreboard, cloud, CraftKit y WorldEdit son adaptadores o integraciones. No deben empujar lógica de gameplay ni reglas de modalidad hacia el dominio de GameKit.
+Los módulos Paper, Velocity y CraftKit son adaptadores o integraciones. zMenu, scoreboard-library, cloud-minecraft, BoostedYAML, NetworkPlayerSettings, PlaceholderAPI y FAWE se usan dentro del módulo runtime que los necesita. No deben empujar lógica de gameplay ni reglas de modalidad hacia el dominio de GameKit.
 
 ---
 
@@ -1877,21 +1897,22 @@ Secuencia recomendada:
 6. Redis runtime mínimo;
 7. server registry;
 8. routing/admission;
+9. Velocity central mínimo mediante `gamekit-velocity-plugin`;
 10. waiting room;
 11. match lifecycle;
 12. team;
-13. Paper adapters mínimos;
-14. experience mínima;
+13. Paper runtime mínimo: `gamekit-paper`, `gamekit-lobby-paper` y `gamekit-arena-paper`;
+14. experience mínima dentro de los runtimes Paper que la ejecutan;
 15. persistence/idempotency base;
-16. arena reset real: template reset y adapters opcionales;
+16. arena reset real mediante FAWE dentro del runtime de arena Paper;
 17. stats;
 18. rewards;
-19. seasons;
+19. season context y ranked requirements donde progression/ranked lo necesiten;
 20. rating/SR;
 21. leaderboards;
 22. competitive integrity;
 23. observability completa;
-24. admin/management in-game;
+24. admin/management in-game con separación entre runtime-local y transversal;
 25. spectator avanzado;
 26. testkit expandido por contratos.
 
@@ -1934,6 +1955,8 @@ El diseño se considera listo para desarrollo cuando el equipo acepta:
 - database como fuente durable;
 - separación clara GameKit vs modalidad;
 - módulos Gradle definidos;
+- separación runtime Paper por lobby, arena/match y admin transversal;
+- plugin Velocity central como único artefacto instalable del plano proxy;
 - private matches fuera del alcance actual;
 - no soporte Folia;
 - seasons manuales;
@@ -1950,7 +1973,7 @@ El diseño se considera listo para desarrollo cuando el equipo acepta:
 ## 33. Glosario breve
 
 **GameKit:** librería interna común para modalidades competitivas.  
-**CraftKit:** librería técnica base para DB, Redis, feedback, integración zMenu, utilidades Paper/Adventure y otras piezas comunes. CraftKit no maneja scoreboards en el diseño actual; scoreboards se integrarán mediante la librería dedicada definida para ese propósito.  
+**CraftKit:** librería técnica base para DB, Redis, feedback, integración zMenu, utilidades Paper/Adventure y otras piezas comunes. CraftKit no maneja scoreboards en el diseño actual; scoreboards se integran mediante scoreboard-library dentro del runtime Paper que los necesita.  
 **GameDefinition:** modalidad conceptual.  
 **MatchVariant:** variante jugable de una modalidad.  
 **QueueTicket:** entrada de jugador/party en cola.  

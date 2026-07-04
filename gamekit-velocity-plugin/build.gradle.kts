@@ -4,7 +4,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":gamekit-velocity"))
+    implementation(project(":gamekit-core"))
+    implementation(project(":gamekit-network"))
     implementation(project(":gamekit-infra-craftkit"))
 
     compileOnly(libs.velocity.api)
