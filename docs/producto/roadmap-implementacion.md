@@ -13,7 +13,7 @@ Ademas, el layout Gradle ya fue alineado con la arquitectura final de runtimes:
 - `gamekit-paper` como base Paper compartida.
 - `gamekit-lobby-paper` como runtime Paper de lobby.
 - `gamekit-arena-paper` como runtime Paper de arena/match.
-- `gamekit-admin-paper` como superficie Paper de administracion transversal.
+- `gamekit-admin-paper` como superficie Paper de administracion transversal para cualquier parte donde se quiera utilizar.
 - `gamekit-velocity-plugin` como unico modulo instalable del plano Velocity.
 
 Esto no significa que los runtimes Paper ya tengan funcionalidad completa. Significa que la estructura donde se implementaran las siguientes fases ya esta preparada.
@@ -45,7 +45,7 @@ Incluye:
 
 **Por que primero:** si los IDs, results y definitions no quedan claros al inicio, cada modulo inventa su propio lenguaje y despues el refactor es caro.
 
-## Fase 2: Testkit Minimo
+## Fase 2: Testkit 
 
 **Estado:** completada.
 
@@ -78,7 +78,7 @@ Incluye:
 
 **Por que antes de queue:** ningun jugador debe entrar a queue, waiting room, match o spectator si ya tiene actividad activa incompatible.
 
-## Fase 4: Redis Runtime Minimo
+## Fase 4: Redis Runtime 
 
 **Estado:** completada.
 
@@ -89,7 +89,7 @@ Incluye:
 - Integracion CraftKit Redis.
 - Redis key conventions.
 - Serializacion simple.
-- Leases/locks minimos.
+- Leases/locks s.
 - Stores runtime para estado temporal.
 
 **Por que aqui:** routing, admissions, arena reservations y active play distribuido dependen de Redis desde el inicio.
@@ -151,7 +151,7 @@ Incluye:
 
 Incluye:
 
-- `gamekit-paper` como base Paper compartida minima.
+- `gamekit-paper` como base Paper compartida .
 - `gamekit-lobby-paper` como runtime de lobby.
 - `gamekit-arena-paper` como runtime de arena/match.
 - Scheduler adapter.
@@ -166,7 +166,7 @@ Incluye:
 
 **Criterio de cierre:** los plugins consumidores pueden componer explicitamente los runtimes Paper base sin cargar responsabilidades que no usan, y el build/publicacion local sigue pasando.
 
-## Fase 9: Velocity Central Minimo
+## Fase 9: Velocity Central 
 
 **Objetivo:** ejecutar transferencias reales entre lobby server y arena server.
 
@@ -204,7 +204,7 @@ Incluye:
 
 **Criterio de cierre:** un jugador transferido con admission valida entra a waiting room; una admission ausente, expirada o incompatible se rechaza de forma auditable.
 
-## Fase 11: Match Lifecycle Minimo
+## Fase 11: Match Lifecycle 
 
 **Objetivo:** crear, iniciar, terminar y limpiar una partida.
 
@@ -249,7 +249,7 @@ Flujo esperado:
 
 **Criterio de cierre:** el flujo completo se puede demostrar con fakes y, cuando aplique, con una prueba ejecutable de integracion local.
 
-## Fase 13: Experience Minima en Runtimes Paper
+## Fase 13: Experience  en Runtimes Paper
 
 **Objetivo:** dar UX comun sin sobrecargar el sistema ni crear un modulo de experience prematuro.
 
@@ -397,14 +397,14 @@ Incluye:
 
 | Hito | Resultado |
 | --- | --- |
-| 1 | Dominio base + testkit minimo. |
+| 1 | Dominio base + testkit . |
 | 2 | Session + active play testeable. |
 | 3 | Redis + network + admissions. |
 | 4 | Arena allocation + queue casual. |
-| 5 | Paper runtime foundation + Velocity minimo. |
+| 5 | Paper runtime foundation + Velocity . |
 | 6 | Waiting room + match lifecycle. |
 | 7 | Primera vertical cross-server completa. |
-| 8 | Experience minima en runtimes Paper. |
+| 8 | Experience  en runtimes Paper. |
 | 9 | Persistence + FAWE arena reset real. |
 | 10 | Stats + rewards. |
 | 11 | Ranked + SR + leaderboards + integrity. |
