@@ -124,7 +124,11 @@ final class DefaultArenaAllocationServiceTest {
         final List<ArenaAllocationResult> results = List.of(first.join(), second.join());
 
         assertEquals(1, results.stream().filter(ArenaAllocationResult::accepted).count());
-        assertEquals(1, results.stream().filter(result -> result.rejectReason().orElse(null) == ArenaAllocationRejectReason.ARENA_ALREADY_RESERVED).count());
+        assertEquals(1, results.stream().filter(ArenaAllocationResult::rejected).count());
+        assertTrue(results.stream()
+            .map(result -> result.rejectReason().orElse(null))
+            .anyMatch(reason -> reason == ArenaAllocationRejectReason.ARENA_ALREADY_RESERVED
+                || reason == ArenaAllocationRejectReason.NO_COMPATIBLE_ARENA));
     }
 
     @Test

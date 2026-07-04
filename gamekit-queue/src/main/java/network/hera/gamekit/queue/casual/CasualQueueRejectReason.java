@@ -1,0 +1,13 @@
+package network.hera.gamekit.queue.casual;
+
+public enum CasualQueueRejectReason {
+    ALREADY_IN_QUEUE,
+    ALREADY_IN_WAITING_ROOM,
+    ALREADY_IN_MATCH,
+    ALREADY_SPECTATING,
+    RECONNECTABLE_MATCH_EXISTS,
+    QUEUE_NOT_CASUAL,
+    NO_SERVER_AVAILABLE,
+    ADMISSION_CREATION_FAILED,
+    ACTIVE_PLAY_CLAIM_FAILED
+}

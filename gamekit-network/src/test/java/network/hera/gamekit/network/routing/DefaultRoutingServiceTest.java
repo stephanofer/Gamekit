@@ -7,6 +7,7 @@ import java.time.Duration;
 import network.hera.gamekit.core.id.GameId;
 import network.hera.gamekit.core.id.ServerId;
 import network.hera.gamekit.network.admission.AdmissionType;
+import network.hera.gamekit.network.admission.WaitingRoomId;
 import network.hera.gamekit.network.location.MatchLocation;
 import network.hera.gamekit.network.location.MatchLocationState;
 import network.hera.gamekit.network.registry.RegisteredServer;
@@ -85,6 +86,37 @@ final class DefaultRoutingServiceTest {
     }
 
     @Test
+    void reconnectRejectsRequestedArenaThatDoesNotMatchLocation() {
+        final TestRuntime runtime = TestRuntime.create();
+        runtime.recordArena(ServerState.ONLINE);
+        runtime.locations.save(new MatchLocation(
+            GameKitFixtures.matchOne(),
+            GameKitFixtures.bedwars(),
+            GameKitFixtures.casual2v2(),
+            GameKitFixtures.bedwarsArena01(),
+            GameKitFixtures.lighthouse01(),
+            MatchLocationState.RUNNING
+        )).join();
+
+        final RoutingDecision decision = runtime.routing.route(new RoutingRequest(
+            GameKitFixtures.playerOne(),
+            AdmissionType.RECONNECT_MATCH,
+            GameKitFixtures.bedwars(),
+            GameKitFixtures.casual2v2(),
+            ServerRole.ARENA,
+            null,
+            GameKitFixtures.rooftop01(),
+            null,
+            GameKitFixtures.matchOne(),
+            runtime.clock.now(),
+            Duration.ofSeconds(30)
+        )).join();
+
+        assertTrue(decision.rejected());
+        assertEquals(RoutingRejectReason.MATCH_LOCATION_MISMATCH, decision.rejectReason().orElseThrow());
+    }
+
+    @Test
     void preferredServerMustBelongToRequestedGameAndRole() {
         final TestRuntime runtime = TestRuntime.create();
         final ServerId skywarsArena = ServerId.of("skywars-arena-01");
@@ -107,12 +139,39 @@ final class DefaultRoutingServiceTest {
             ServerRole.ARENA,
             skywarsArena,
             null,
+            null,
+            null,
             runtime.clock.now(),
             Duration.ofSeconds(30)
         )).join();
 
         assertTrue(decision.rejected());
         assertEquals(RoutingRejectReason.TARGET_SERVER_NOT_AVAILABLE, decision.rejectReason().orElseThrow());
+    }
+
+    @Test
+    void preferredServerRoutePreservesWaitingRoomDestinationContext() {
+        final TestRuntime runtime = TestRuntime.create();
+        final WaitingRoomId waitingRoomId = WaitingRoomId.of("room_01");
+        runtime.recordArena(ServerState.ONLINE);
+
+        final RoutingDecision decision = runtime.routing.route(new RoutingRequest(
+            GameKitFixtures.playerOne(),
+            AdmissionType.JOIN_WAITING_ROOM,
+            GameKitFixtures.bedwars(),
+            GameKitFixtures.casual2v2(),
+            ServerRole.ARENA,
+            GameKitFixtures.bedwarsArena01(),
+            GameKitFixtures.lighthouse01(),
+            waitingRoomId,
+            null,
+            runtime.clock.now(),
+            Duration.ofSeconds(30)
+        )).join();
+
+        assertTrue(decision.accepted());
+        assertEquals(GameKitFixtures.lighthouse01(), decision.requireAdmissionRequest().arenaIdOptional().orElseThrow());
+        assertEquals(waitingRoomId, decision.requireAdmissionRequest().waitingRoomIdOptional().orElseThrow());
     }
 
     private static RoutingRequest newJoinRequest(final FakeGameKitClock clock) {
@@ -122,6 +181,8 @@ final class DefaultRoutingServiceTest {
             GameKitFixtures.bedwars(),
             GameKitFixtures.casual2v2(),
             ServerRole.ARENA,
+            null,
+            null,
             null,
             null,
             clock.now(),
@@ -136,6 +197,8 @@ final class DefaultRoutingServiceTest {
             GameKitFixtures.bedwars(),
             GameKitFixtures.casual2v2(),
             ServerRole.ARENA,
+            null,
+            null,
             null,
             GameKitFixtures.matchOne(),
             clock.now(),

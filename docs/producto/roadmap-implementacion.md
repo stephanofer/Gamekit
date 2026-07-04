@@ -112,7 +112,7 @@ Incluye:
 
 **Por que casual primero:** ranked depende de seasons, rating, integrity y penalties. Casual permite validar el flujo sin cargar complejidad competitiva todavia.
 
-## Fase 8: Paper Adapter Minimo
+## Fase 8: Paper Adapter 
 
 **Objetivo:** conectar dominio con Paper sin meter logica de negocio en Paper.
 
@@ -120,9 +120,8 @@ Incluye:
 
 - Scheduler adapter.
 - Listener registration handles.
-- Player/world operations minimas.
+- Player/world operations.
 - Logica comun de lobby para lobby servers de modalidad.
-- Metadata `paper-plugin.yml` para ejemplos consumidores.
 - Publicacion Maven Local validada.
 
 **Por que aqui:** ya existe dominio suficiente para que Paper sea adaptador real, no lugar donde se improvisa gameplay.

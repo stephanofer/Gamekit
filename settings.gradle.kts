@@ -45,5 +45,4 @@ include(
     "gamekit-velocity-plugin",
     "gamekit-paper-worldedit",
     "gamekit-testkit",
-    "gamekit-examples",
 )

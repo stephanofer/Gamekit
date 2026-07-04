@@ -7,4 +7,7 @@ dependencies {
     api(project(":gamekit-core"))
     api(project(":gamekit-session"))
     api(project(":gamekit-network"))
+    api(project(":gamekit-arena"))
+
+    testImplementation(project(":gamekit-testkit"))
 }

@@ -53,7 +53,8 @@ public final class DefaultRoutingService implements RoutingService {
             }
             final MatchLocation resolvedLocation = location.get();
             if (!resolvedLocation.gameId().equals(request.gameId())
-                    || request.variantIdOptional().filter(variantId -> !resolvedLocation.variantId().equals(variantId)).isPresent()) {
+                    || request.variantIdOptional().filter(variantId -> !resolvedLocation.variantId().equals(variantId)).isPresent()
+                    || request.arenaIdOptional().filter(arenaId -> !resolvedLocation.arenaId().equals(arenaId)).isPresent()) {
                 return CompletableFuture.completedFuture(RoutingDecision.reject(RoutingRejectReason.MATCH_LOCATION_MISMATCH));
             }
             if (!resolvedLocation.state().routable()) {
@@ -96,7 +97,8 @@ public final class DefaultRoutingService implements RoutingService {
             .targetServerId(serverId)
             .gameId(request.gameId())
             .variantId(request.variantIdOptional().orElse(null))
-            .arenaId(arenaId)
+            .arenaId(arenaId != null ? arenaId : request.arenaIdOptional().orElse(null))
+            .waitingRoomId(request.waitingRoomIdOptional().orElse(null))
             .matchId(request.matchIdOptional().orElse(null))
             .createdAt(request.requestedAt())
             .expiresAt(request.requestedAt().plus(request.admissionTtl()))
