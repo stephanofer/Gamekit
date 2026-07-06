@@ -7,8 +7,13 @@ dependencies {
     implementation(project(":gamekit-core"))
     implementation(project(":gamekit-network"))
     implementation(project(":gamekit-infra-craftkit"))
+    implementation(libs.boosted.yaml)
 
     compileOnly(libs.velocity.api)
+    annotationProcessor(libs.velocity.api)
+
+    testImplementation(libs.velocity.api)
+    testImplementation(project(":gamekit-testkit"))
 }
 
 tasks {

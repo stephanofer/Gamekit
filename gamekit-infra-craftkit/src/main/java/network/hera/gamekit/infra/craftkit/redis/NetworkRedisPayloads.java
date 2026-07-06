@@ -23,6 +23,7 @@ import network.hera.gamekit.network.location.MatchLocationState;
 import network.hera.gamekit.network.registry.RegisteredServer;
 import network.hera.gamekit.network.registry.ServerRole;
 import network.hera.gamekit.network.registry.ServerState;
+import network.hera.gamekit.network.transfer.TransferRequest;
 
 final class NetworkRedisPayloads {
 
@@ -111,6 +112,25 @@ final class NetworkRedisPayloads {
             ServerId.of(values.get("server")),
             ArenaId.of(values.get("arena")),
             MatchLocationState.valueOf(values.get("state"))
+        );
+    }
+
+    static String transferRequest(final TransferRequest request) {
+        return join(Map.ofEntries(
+            Map.entry("player", request.playerId().toString()),
+            Map.entry("target", request.targetServerId().toString()),
+            Map.entry("admission", request.admissionRequestId().toString()),
+            Map.entry("requested", Long.toString(request.requestedAt().toEpochMilli()))
+        ));
+    }
+
+    static TransferRequest transferRequest(final String payload) {
+        final Map<String, String> values = split(payload);
+        return new TransferRequest(
+            PlayerId.of(java.util.UUID.fromString(values.get("player"))),
+            ServerId.of(values.get("target")),
+            AdmissionRequestId.parse(values.get("admission")),
+            Instant.ofEpochMilli(Long.parseLong(values.get("requested")))
         );
     }
 
