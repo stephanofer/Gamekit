@@ -8,3 +8,5 @@ target/
 # IDE metadata is local state.
 .idea/
 *.iml
+# Local Pi runtime state
+.atl/
